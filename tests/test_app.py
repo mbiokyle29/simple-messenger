@@ -1,4 +1,6 @@
 ''' test_app.py '''
+from flask import url_for
+
 from tests.base import Base
 
 
@@ -16,7 +18,7 @@ class TestApp(Base):
         )
 
     def test_health(self):
-        res = self.client.get('/health')
+        res = self.client.get(url_for('health'))
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(
