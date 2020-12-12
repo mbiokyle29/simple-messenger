@@ -10,6 +10,7 @@ jobs:
 
     name: test_python
     runs-on: ubuntu-latest
+    container: python:3.8-alpine
 
     services:
       postgres:
