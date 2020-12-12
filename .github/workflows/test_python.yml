@@ -35,4 +35,4 @@ jobs:
           pip install -r requirements_dev.txt --upgrade
 
       - name: run tests
-        run: py.test tests/
+        run: py.test tests
