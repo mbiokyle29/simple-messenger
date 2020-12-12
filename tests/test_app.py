@@ -1,15 +1,8 @@
 ''' test_app.py '''
-from flask_testing import TestCase
-
-from simple_messenger.app import create_app
+from tests.base import Base
 
 
-class TestApp(TestCase):
-
-    def create_app(self):
-        app = create_app()
-        app.config['TESTING'] = True
-        return app
+class TestApp(Base):
 
     def test_generic_404(self):
         res = self.client.get('/foo/bar')
