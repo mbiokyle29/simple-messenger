@@ -11,6 +11,19 @@ jobs:
     name: test_python
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: password123
+          POSTGRES_USER: simple_messenger_user
+          POSTGRES_DB: simple_messenger
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -36,3 +49,5 @@ jobs:
 
       - name: run tests
         run: py.test tests
+        env:
+          SQLALCHEMY_DATABASE_URL: postgresql://simple_messenger_user:password123@postgres:5432/simple_messenger
