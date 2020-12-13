@@ -1,0 +1,243 @@
+swagger: "2.0"
+info:
+  description: Simple messaging api
+  version: 1.0.0
+  title: Simple Messenger
+tags:
+  - name: Users
+    description: User routes
+  - name: Messages
+    description: Messaging routes
+schemes:
+  - https
+  - http
+paths:
+  /health:
+    get:
+      summary: health check
+      operationId: health-check
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        200:
+          description: healthy response
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum:
+                  - OK
+            required:
+              - status
+            additionalProperties: false
+  /users:
+    post:
+      tags:
+        - Users
+      summary: create a new user
+      operationId: user-create
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        201:
+          description: new user
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+                format: uuid 
+            required:
+              - user_id
+            additionalProperties: false
+    get:
+      tags:
+        - Users
+      summary: list all users
+      operationId: user-list
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        200:
+          description: user list
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  format: uuid 
+              required:
+                - user_id
+              additionalProperties: false
+            additionalItems: false
+  /users/{user_id}:
+    get:
+      tags:
+        - Users
+      summary: get a single user
+      operationId: user-detail
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        200:
+          description: user
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+                format: uuid 
+            required:
+              - user_id
+            additionalProperties: false
+  /messages:
+    post:
+      tags:
+        - Messages
+      summary: create a new message
+      operationId: message-create
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Message info to create
+          required: true
+          schema:
+            type: object
+            properties:
+              sender_id:
+                type: string
+                format: uuid 
+              receiver_id:
+                type: string
+                format: uuid 
+              message_text:
+                type: string
+            required:
+              - sender_id
+              - receiver_id
+              - message_text
+            additionalProperties: false            
+      responses:
+        201:
+          description: new message
+          schema:
+            type: object
+            properties:
+              message_id:
+                type: string
+                format: uuid 
+              sender_id:
+                type: string
+                format: uuid 
+              receiver_id:
+                type: string
+                format: uuid 
+              message_text:
+                type: string
+              created_at:
+                type: string
+                format: date-time
+            required:
+              - message_id
+              - sender_id
+              - receiver_id
+              - message_text
+              - created_at
+            additionalProperties: false
+    get:
+      tags:
+        - Messages
+      summary: list of messages
+      operationId: message-list
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: limit
+          description: limit number of returned messages
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: since
+          description: only get messages sent since a certain date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: sender_id
+          description: only get messages from this sender (sender_id and receiver_id are required together)
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: receiver_id
+          description: only get messages to this receiver (sender_id and receiver_id are required together)
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: message list
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                message_id:
+                  type: string
+                  format: uuid 
+                sender_id:
+                  type: string
+                  format: uuid 
+                receiver_id:
+                  type: string
+                  format: uuid 
+                message_text:
+                  type: string
+                created_at:
+                  type: string
+                  format: date-time
+              required:
+                - message_id
+                - sender_id
+                - receiver_id
+                - message_text
+                - created_at
+              additionalProperties: false
+            additionalItems: false
+        400:
+          description: message list error
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              status:
+                type: string
+                enum:
+                  - BAD_REQUEST
+            required:
+              - message
+              - status
+            additionalProperties: false

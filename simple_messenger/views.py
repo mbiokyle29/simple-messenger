@@ -44,16 +44,27 @@ def get_user(user_id):
 def new_message():
 
     message_data = request.json
-    sender = User.get_or_create(message_data['sender_id'])
-    receiver = User.get_or_create(message_data['receiver_id'])
 
-    message = Message(
-        message_text=message_data['message_text'],
-        sender_id=sender.user_id,
-        receiver_id=receiver.user_id,
-    )
-    db.session.add(message)
-    db.session.commit()
+    try:
+        sender = User.get_or_create(message_data['sender_id'])
+        receiver = User.get_or_create(message_data['receiver_id'])
+
+        message = Message(
+            message_text=message_data['message_text'],
+            sender_id=sender.user_id,
+            receiver_id=receiver.user_id,
+        )
+        db.session.add(message)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise SimpleMessengerException(
+            (
+                f'Cannot create new message from malformed payload: {message_data}!'
+            ),
+            'BAD_REQUEST',
+            400,
+        )
 
     return (
         jsonify(message.serialize()),
@@ -62,7 +73,7 @@ def new_message():
     )
 
 
-@api.route('/messages/recent', methods=['GET'])
+@api.route('/messages', methods=['GET'])
 def list_messages():
 
     # if either are specified, both must be
@@ -82,6 +93,7 @@ def list_messages():
                     f'receiver:{receiver_query_id}, '
                     'query IDs must both be valid UUIDs'
                 ),
+                'BAD_REQUEST',
                 400,
             )
 
@@ -111,6 +123,7 @@ def list_messages():
                     f'Cannot apply since query with value: {request.args["since"]}! '
                     f'Error parsing to datetime: {e}'
                 ),
+                'BAD_REQUEST',
                 400,
             )
 
@@ -127,6 +140,7 @@ def list_messages():
                     f'Cannot apply limit query with value: {request.args["limit"]}! '
                     f'Error parsing to integer: {e}'
                 ),
+                'BAD_REQUEST',
                 400,
             )
         base_query = base_query.limit(limit)

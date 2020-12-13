@@ -10,12 +10,7 @@ class TestApp(Base):
         res = self.client.get('/foo/bar')
 
         self.assertEqual(res.status_code, 404)
-        self.assertEqual(
-            res.json,
-            {
-                'status': 'NOT_FOUND',
-            }
-        )
+        self.assertEqual(res.json['status'], 'NOT_FOUND')
 
     def test_health(self):
         res = self.client.get(url_for('health'))
@@ -27,3 +22,7 @@ class TestApp(Base):
                 'status': 'OK',
             }
         )
+
+    def test_docs(self):
+        res = self.client.get('/docs/')
+        self.assertEqual(res.status_code, 200)

@@ -73,11 +73,13 @@ class TestGetUser(Base):
     def test_get_user_no_users(self):
         res = self.client.get(url_for('api.get_user', user_id=str(uuid4())))
         self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.json['status'], 'NOT_FOUND')
 
     def test_get_user_wrong_id(self):
         self.create_user()
         res = self.client.get(url_for('api.get_user', user_id=str(uuid4())))
         self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.json['status'], 'NOT_FOUND')
 
     def test_get_user(self):
         user = self.create_user()
@@ -91,6 +93,58 @@ class TestGetUser(Base):
 
 
 class TestNewMessage(Base):
+
+    def test_new_message_empty_payload_error(self):
+        payload = {}
+        res = self.client.post(
+            url_for('api.new_message'),
+            json=payload,
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('create new message', res.json['message'])
+
+        self.assertEqual(
+            db.session.query(Message).count(),
+            0,
+        )
+
+    def test_new_message_no_message_text_error(self):
+        payload = {
+            'sender_id': str(uuid4()),
+            'receiver_id': str(uuid4()),
+        }
+        res = self.client.post(
+            url_for('api.new_message'),
+            json=payload,
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('create new message', res.json['message'])
+
+        self.assertEqual(
+            db.session.query(Message).count(),
+            0,
+        )
+
+    def test_new_message_malformed_uuids_error(self):
+        payload = {
+            'message_text': 'hello',
+            'sender_id': 'foobar',
+            'receiver_id': str(uuid4()),
+        }
+        res = self.client.post(
+            url_for('api.new_message'),
+            json=payload,
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('create new message', res.json['message'])
+
+        self.assertEqual(
+            db.session.query(Message).count(),
+            0,
+        )
 
     def test_new_message(self):
         sender = self.create_user()
@@ -184,7 +238,8 @@ class TestListMessages(Base):
         res = self.client.get(url_for('api.list_messages', limit='foorbar'))
 
         self.assertEqual(res.status_code, 400)
-        self.assertIn('limit query', res.json['status'])
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('limit query', res.json['message'])
 
     def test_list_messages_empty_since(self):
         res = self.client.get(url_for('api.list_messages', since=arrow.now().isoformat()))
@@ -196,7 +251,8 @@ class TestListMessages(Base):
         res = self.client.get(url_for('api.list_messages', since='foobar'))
 
         self.assertEqual(res.status_code, 400)
-        self.assertIn('since query', res.json['status'])
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('since query', res.json['message'])
 
     def test_list_messages_empty_conversation(self):
         res = self.client.get(
@@ -219,7 +275,8 @@ class TestListMessages(Base):
         )
 
         self.assertEqual(res.status_code, 400)
-        self.assertIn('Cannot list messages between', res.json['status'])
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('Cannot list messages between', res.json['message'])
 
     def test_list_messages_missing_receiver(self):
         res = self.client.get(
@@ -230,7 +287,8 @@ class TestListMessages(Base):
         )
 
         self.assertEqual(res.status_code, 400)
-        self.assertIn('Cannot list messages between', res.json['status'])
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('Cannot list messages between', res.json['message'])
 
     def test_list_messages_invalid_sender(self):
         res = self.client.get(
@@ -242,7 +300,8 @@ class TestListMessages(Base):
         )
 
         self.assertEqual(res.status_code, 400)
-        self.assertIn('Cannot list messages between', res.json['status'])
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('Cannot list messages between', res.json['message'])
 
     def test_list_messages_invalid_receiver(self):
         res = self.client.get(
@@ -254,7 +313,8 @@ class TestListMessages(Base):
         )
 
         self.assertEqual(res.status_code, 400)
-        self.assertIn('Cannot list messages between', res.json['status'])
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('Cannot list messages between', res.json['message'])
 
     def test_list_messages(self):
         message = self.create_message()

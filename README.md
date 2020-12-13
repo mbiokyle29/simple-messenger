@@ -28,6 +28,11 @@ A Dockerfile is maintained to facilitate a more controlled execution environment
 - The image instantiated with the following command: `docker run -d -p 5000:5000 simple-messenger:latest`
 - The above commands are available via the `Makefile` as `dbuild` and `drun`
 
+A docker-compose file also exists to deploy the application with its own database. This is currently
+used for integration tests in github actions. The application can be built with: `docker-compose build`
+and started with `docker-compose up` (optionally with `-d` for detached). The API will be available
+at `localhost:5000` once started.
+
 
 ## Data Layer
 
@@ -65,3 +70,25 @@ The following command should be run when brining up a new development environmen
 
 Changes to the schema should be captured using `make db_migrate` and a subsequently applied to the DB using `make db_upgrade`.
 Note that migrations only apply to the default database. The tests create/destroy tables on `simple_messenger_test` during test execution.
+
+
+## API
+
+This service provides a minimal API for working with the data models (Users and Messages).
+
+For users you can:
+- create a new user (essentially just get the UUID)
+- list all users
+- see a single user
+
+For messages you can:
+- post a new message between 2 users
+- list messages
+
+The messaging listing endpoint supports a number of query parameters, and operates in 2 modes:
+1. Global mode, all messages are returned. The results can be filtered using the `since` and `limit` params
+2. Conversation mode. In this mode `sender_id` and `receiver_id` must both be provided. The results will only include messages sender from / sent to these users. `since` and `limit` can also be applied here.
+
+### SWAGGER docs
+
+There are swagger docs located in the `simple_messenger/static/swagger.yml` file. These can be viewed at the `/docs/` route. Note that they are manually maintained at this time, and since they are loaded at app creation, changes to the file will not be picked up by the dev server hot reload.
