@@ -28,6 +28,11 @@ A Dockerfile is maintained to facilitate a more controlled execution environment
 - The image instantiated with the following command: `docker run -d -p 5000:5000 simple-messenger:latest`
 - The above commands are available via the `Makefile` as `dbuild` and `drun`
 
+A docker-compose file also exists to deploy the application with its own database. This is currently
+used for integration tests in github actions. The application can be built with: `docker-compose build`
+and started with `docker-compose up` (optionally with `-d` for detached). The API will be available
+at `localhost:5000` once started.
+
 
 ## Data Layer
 
