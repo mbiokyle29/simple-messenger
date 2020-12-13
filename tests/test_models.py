@@ -12,13 +12,6 @@ from tests.base import Base
 
 class TestModels(Base):
 
-    def create_user(self):
-        user = User()
-        db.session.add(user)
-        db.session.commit()
-
-        return user
-
     def test_user_create(self):
         user = User()
         db.session.add(user)

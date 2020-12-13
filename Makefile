@@ -23,7 +23,7 @@ lint:
 
 test:
 	env SQLALCHEMY_DATABASE_URL=postgresql://simple_messenger_user:password123@localhost/simple_messenger_test \
-	py.test tests
+	py.test tests -s
 
 run:
 	env SQLALCHEMY_DATABASE_URL=postgresql://simple_messenger_user:password123@localhost/simple_messenger \

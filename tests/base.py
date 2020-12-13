@@ -2,7 +2,7 @@
 from flask_testing import TestCase
 
 from simple_messenger.app import create_app
-from simple_messenger.models import db
+from simple_messenger.models import db, User
 
 
 class Base(TestCase):
@@ -17,3 +17,10 @@ class Base(TestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+
+    def create_user(self):
+        user = User()
+        db.session.add(user)
+        db.session.commit()
+
+        return user

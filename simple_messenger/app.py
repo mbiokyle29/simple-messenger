@@ -4,7 +4,9 @@ import os
 from flask import Flask, jsonify
 from flask_migrate import Migrate
 
+from simple_messenger.exceptions import SimpleMessengerException
 from simple_messenger.models import db
+from simple_messenger.views import api
 
 
 def create_app():
@@ -12,13 +14,18 @@ def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQLALCHEMY_DATABASE_URL']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db.init_app(app)
+    app.register_blueprint(api)
 
+    db.init_app(app)
     Migrate(app, db)
 
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({'status': 'NOT_FOUND'}), 404
+
+    @app.errorhandler(SimpleMessengerException)
+    def application_exception(error):
+        return jsonify({'status': error.message}), error.status_code
 
     @app.route('/health')
     def health():
