@@ -44,16 +44,27 @@ def get_user(user_id):
 def new_message():
 
     message_data = request.json
-    sender = User.get_or_create(message_data['sender_id'])
-    receiver = User.get_or_create(message_data['receiver_id'])
 
-    message = Message(
-        message_text=message_data['message_text'],
-        sender_id=sender.user_id,
-        receiver_id=receiver.user_id,
-    )
-    db.session.add(message)
-    db.session.commit()
+    try:
+        sender = User.get_or_create(message_data['sender_id'])
+        receiver = User.get_or_create(message_data['receiver_id'])
+
+        message = Message(
+            message_text=message_data['message_text'],
+            sender_id=sender.user_id,
+            receiver_id=receiver.user_id,
+        )
+        db.session.add(message)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise SimpleMessengerException(
+            (
+                f'Cannot create new message from malformed payload: {message_data}!'
+            ),
+            'BAD_REQUEST',
+            400,
+        )
 
     return (
         jsonify(message.serialize()),

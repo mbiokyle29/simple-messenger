@@ -94,6 +94,58 @@ class TestGetUser(Base):
 
 class TestNewMessage(Base):
 
+    def test_new_message_empty_payload_error(self):
+        payload = {}
+        res = self.client.post(
+            url_for('api.new_message'),
+            json=payload,
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('create new message', res.json['message'])
+
+        self.assertEqual(
+            db.session.query(Message).count(),
+            0,
+        )
+
+    def test_new_message_no_message_text_error(self):
+        payload = {
+            'sender_id': str(uuid4()),
+            'receiver_id': str(uuid4()),
+        }
+        res = self.client.post(
+            url_for('api.new_message'),
+            json=payload,
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('create new message', res.json['message'])
+
+        self.assertEqual(
+            db.session.query(Message).count(),
+            0,
+        )
+
+    def test_new_message_malformed_uuids_error(self):
+        payload = {
+            'message_text': 'hello',
+            'sender_id': 'foobar',
+            'receiver_id': str(uuid4()),
+        }
+        res = self.client.post(
+            url_for('api.new_message'),
+            json=payload,
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json['status'], 'BAD_REQUEST')
+        self.assertIn('create new message', res.json['message'])
+
+        self.assertEqual(
+            db.session.query(Message).count(),
+            0,
+        )
+
     def test_new_message(self):
         sender = self.create_user()
         receiver = self.create_user()
