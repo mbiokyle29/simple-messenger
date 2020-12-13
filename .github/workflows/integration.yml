@@ -1,0 +1,46 @@
+name: compose_build
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  compose_build:
+
+    name: compose_build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: build compose containers
+        run: docker-compose build
+
+      - name: start compose containers
+        run: docker-compose up -d
+
+      - name: list logs
+        run: docker-compose logs
+
+      - name: list status
+        run: docker-compose ps
+
+      - name: post message
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          retry_wait_seconds: 10
+          max_attempts: 3
+          command: |
+            curl -d '{"mesage_text":"hi","sender_id":"4745b41f-4324-4515-88a1-1c0b516794ea","receiver_id":"608d8336-8b0c-45db-81a2-5d17476db8e5"}' \
+            -H 'Content-Type: application/json' \
+            http://localhost:5000/api/messages
+      - name: get message
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          retry_wait_seconds: 10
+          max_attempts: 3
+          command: |
+            curl http://localhost:5000/api/messages | grep --silent 'hi'

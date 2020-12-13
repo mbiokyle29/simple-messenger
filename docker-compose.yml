@@ -1,0 +1,36 @@
+version: "3.8"
+   
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_USER=simple_messenger_user
+      - POSTGRES_DB=simple_messenger
+  db_wait:
+    restart: on-failure
+    image: willwill/wait-for-it
+    command: db:5432 -- echo 'db up'
+    depends_on:
+      - db
+  migrate:
+    restart: on-failure
+    build: .
+    command: flask db upgrade
+    environment:
+      - SQLALCHEMY_DATABASE_URL=postgresql://simple_messenger_user:password123@db/simple_messenger
+    depends_on:
+      - db
+      - db_wait
+  web:
+    restart: always
+    build: .
+    command: flask run -h 0.0.0.0 -p 5000
+    environment:
+      - SQLALCHEMY_DATABASE_URL=postgresql://simple_messenger_user:password123@db/simple_messenger
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+      - db_wait
+      - migrate
