@@ -1,8 +1,10 @@
 ''' app.py '''
 import os
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_migrate import Migrate
+from flask_swagger_ui import get_swaggerui_blueprint
+from yaml import safe_load
 
 from simple_messenger.exceptions import SimpleMessengerException
 from simple_messenger.models import db
@@ -19,13 +21,31 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
 
+    swagger_path = os.path.join(
+        os.path.dirname(__file__),
+        'static/swagger.yml',
+    )
+    swagger_yml = safe_load(open(swagger_path, 'r'))
+    blueprint = get_swaggerui_blueprint(
+        '/docs',
+        swagger_path,
+        config={'spec': swagger_yml},
+    )
+    app.register_blueprint(blueprint)
+
     @app.errorhandler(404)
     def not_found(error):
-        return jsonify({'status': 'NOT_FOUND'}), 404
+        return jsonify({
+            'status': 'NOT_FOUND',
+            'message': f'No resource found at: {request.path}',
+        }), 404
 
     @app.errorhandler(SimpleMessengerException)
     def application_exception(error):
-        return jsonify({'status': error.message}), error.status_code
+        return jsonify({
+            'status': error.status,
+            'message': error.message,
+        }), error.status_code
 
     @app.route('/health')
     def health():

@@ -62,7 +62,7 @@ def new_message():
     )
 
 
-@api.route('/messages/recent', methods=['GET'])
+@api.route('/messages', methods=['GET'])
 def list_messages():
 
     # if either are specified, both must be
@@ -82,6 +82,7 @@ def list_messages():
                     f'receiver:{receiver_query_id}, '
                     'query IDs must both be valid UUIDs'
                 ),
+                'BAD_REQUEST',
                 400,
             )
 
@@ -111,6 +112,7 @@ def list_messages():
                     f'Cannot apply since query with value: {request.args["since"]}! '
                     f'Error parsing to datetime: {e}'
                 ),
+                'BAD_REQUEST',
                 400,
             )
 
@@ -127,6 +129,7 @@ def list_messages():
                     f'Cannot apply limit query with value: {request.args["limit"]}! '
                     f'Error parsing to integer: {e}'
                 ),
+                'BAD_REQUEST',
                 400,
             )
         base_query = base_query.limit(limit)
