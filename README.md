@@ -66,7 +66,7 @@ env SQLALCHEMY_DATABASE_URL=postgresql://simple_messenger_user:password123@local
 ```
 
 Note that this should never need to be re-run, and it will error if ran again (the `migrations/` directory already exists).
-The following command should be run when brining up a new development environment: `make db_upgrade`
+The following command should be run when bringing up a new development environment: `make db_upgrade`
 
 Changes to the schema should be captured using `make db_migrate` and a subsequently applied to the DB using `make db_upgrade`.
 Note that migrations only apply to the default database. The tests create/destroy tables on `simple_messenger_test` during test execution.
@@ -85,9 +85,9 @@ For messages you can:
 - post a new message between 2 users
 - list messages
 
-The messaging listing endpoint supports a number of query parameters, and operates in 2 modes:
+The message listing endpoint supports a number of query parameters, and operates in 2 modes:
 1. Global mode, all messages are returned. The results can be filtered using the `since` and `limit` params
-2. Conversation mode. In this mode `sender_id` and `receiver_id` must both be provided. The results will only include messages sender from / sent to these users. `since` and `limit` can also be applied here.
+2. Conversation mode. In this mode `sender_id` and `receiver_id` must both be provided. The results will only include messages sent from / sent to these users. `since` and `limit` can also be applied here.
 
 ### SWAGGER docs
 
