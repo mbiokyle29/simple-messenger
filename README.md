@@ -11,7 +11,7 @@ First time setup is as follows:
 
 1. Create a virtual environment: `python3 -m venv .venv`
 2. Activate the virtual environments: `source .venv/bin/activate`
-3. Install application and development requirements: `pip install -r requirements_dev --upgrade`
+3. Install application and development requirements: `pip install -r requirements_dev.txt --upgrade`
 
 Subsequent setup only requires the running of step #2 and optionally step #3 (if requirements have changed).
 
