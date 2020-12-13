@@ -33,9 +33,10 @@ jobs:
           retry_wait_seconds: 10
           max_attempts: 3
           command: |
-            curl -d '{"mesage_text":"hi","sender_id":"4745b41f-4324-4515-88a1-1c0b516794ea","receiver_id":"608d8336-8b0c-45db-81a2-5d17476db8e5"}' \
+            curl -d '{"message_text":"hi","sender_id":"4745b41f-4324-4515-88a1-1c0b516794ea","receiver_id":"608d8336-8b0c-45db-81a2-5d17476db8e5"}' \
             -H 'Content-Type: application/json' \
-            http://localhost:5000/api/messages
+            http://localhost:5000/api/messages | grep --silent 'hi'
+
       - name: get message
         uses: nick-invision/retry@v2
         with:
